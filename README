@@ -1,13 +1,43 @@
 ActsAsConfigurable
 ==================
 
-Introduction goes here.
+I often find myself adding boolean flags or switches to my models, which are hardly ever used.
+Examples being:
+  "some of our clients want to display the logo on the right, although most of them want it on the left"
+  "some other client wants to hide error messages"
 
+Now, we could add a database column for each of those,
+but eventually we'll end up with massive columns, that it takes 10 minutes of downtime to migrate.
+Or, we'll just end up with a messy DB model.
+
+My solution is;
+  "if it's sparse, stick some acts_as_configurable magic"
+
+A separate table that stores all these random, sparsely populated, configurables.
+Attaching them polymorphically.
 
 Example
 =======
 
-Example goes here.
+class Organisation < ActiveRecord::Base
+  acts_as_configurable :show_logo_on_side => {
+    :default => "left",
+    :options => ["left", "middle", "right"],
+    :description => "Where should we put the logo?"},
+end
 
+It acts like a normal attribute.
+with a default, that will be used if no other value has been set.
 
-Copyright (c) 2008 [name of plugin creator], released under the MIT license
+Want to stick it dynamically into a form,
+
+<% Organisation.configurable_properties.each do |property, attribs| %>
+  <li>
+    <%= label_tag("organisation_#{property}", "#{property.to_s.titleize}:") %><%=select("organisation",property, attribs[:options]) %>
+    <%= help_tooltip(attribs[:description]) %>
+  </li>
+<% end %>
+
+Something like that :)
+
+Copyright (c) 2008 [Matthew Rudy Jacobs], released under the MIT license
