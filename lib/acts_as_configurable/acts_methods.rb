@@ -30,7 +30,7 @@ module ActsAsConfigurable
         if record = get_configuration_record(property) 
           return record.value
         else
-          return self.configurable_properties[property][:default]
+          return get_configurable_property(property)[:default]
         end
       end
       
@@ -38,7 +38,15 @@ module ActsAsConfigurable
         self.configured_properties.detect{|object| object.property == property.to_s}
       end
       
+      def get_configurable_property(property)
+        cp = self.configurable_properties[property]
+        raise(ArgumentError, "property: #{property.inspect} is not defined") unless cp
+        return cp
+      end
+
       def set_config_for(property, value)
+        raise(ArgumentError, "property: #{property.inspect} cannot be set to #{value.inspect}") unless get_configurable_property(property)[:options].include?(value)
+        
         if existing = self.get_configuration_record(property)
           existing.value = value
         else

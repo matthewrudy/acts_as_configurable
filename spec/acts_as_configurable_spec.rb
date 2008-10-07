@@ -73,6 +73,12 @@ describe ActsAsConfigurable do
       @it.some_property.should == "right"
     end
     
+    it "should raise an exception if a value is passed that is not in the options" do
+      @it.configurable_properties[:some_property][:options].should == ["left", "middle", "right"]
+      
+      lambda {@it.some_property = "something else"}.should raise_error(ArgumentError)
+    end
+    
     it "should save a setting if a setting already exists" do
       @it.some_property = "right"
       @it.save
